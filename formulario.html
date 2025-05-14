@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Correction Checklist</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #d6f5d6;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      background-color: #fff;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    header img {
+      height: 60px;
+      width: auto;
+      border-radius: 8px;
+      margin-right: 20px;
+    }
+
+    header h1 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #000;
+      margin: 0;
+    }
+
+    main {
+      max-width: 800px;
+      background-color: #ffffffcc;
+      margin: 40px auto;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-top: 15px;
+    }
+
+    input[type="text"],
+    input[type="url"],
+    input[type="date"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+
+    textarea {
+      resize: vertical;
+    }
+
+    input[type="checkbox"],
+    input[type="radio"] {
+      margin-top: 10px;
+    }
+
+    button {
+      margin-top: 20px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-right: 10px;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
+
+    hr {
+      margin-top: 30px;
+      border: none;
+      border-top: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <img src="https://i.ytimg.com/vi/aWcON7jyz0I/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLCWLHjOMSwkh-ZQysibuqDp6DsWEQ" alt="USA4ALL Logo">
+    <h1>USA4ALL - Immigration Law</h1>
+  </header>
+
+  <main>
+    <form id="formulario">
+      <label>Case link (via MyCase):</label>
+      <input type="url" name="case_link">
+
+      <label>Reviewed on:</label>
+      <input type="date" name="reviewed_on">
+
+      <label>Return by:</label>
+      <input type="date" name="return_by">
+
+      <label>Reviewing Attorney:</label>
+      <input type="text" name="attorney">
+
+      <label>Primary Reviewer:</label>
+      <select name="primary_reviewer">
+        <option value=""></option>
+        <option>Ísis Almeida Silva</option>
+        <option>Naiara Daher</option>
+        <option>Sandra Moser</option>
+      </select>
+
+      <label>Case Manager:</label>
+      <select name="case_manager">
+        <option value=""></option>
+        <option>Fabiana Nascimento</option>
+        <option>Isis A. Silva</option>
+        <option>Lucas Franco</option>
+        <option>Myrelle Sinder</option>
+        <option>Mylena Rodrigues</option>
+        <option>Paola Fantinatti</option>
+        <option>Pedro Hartmann</option>
+      </select>
+
+      <label>Reviewed Document Name:</label>
+      <select name="document_name">
+        <option value=""></option>
+        <option>Cover Letter</option>
+        <option>Final Package</option>
+        <option>Form</option>
+      </select>
+
+      <label>Document version (link):</label>
+      <input type="url" name="version_link">
+
+      <div id="correction-items">
+        <div class="correction-item">
+          <h3>Correction Item</h3>
+
+          <label>Error Description:</label>
+          <textarea name="error_description"></textarea>
+
+          <label>Error Page:</label>
+          <input type="text" name="error_page">
+
+          <label>Error Paragraph:</label>
+          <input type="text" name="error_paragraph">
+
+          <h3>Error Type:</h3>
+          <input type="checkbox" name="error_type" value="Graphic"> Graphic<br>
+          <input type="checkbox" name="error_type" value="Formatting"> Formatting<br>
+          <input type="checkbox" name="error_type" value="Technical"> Technical<br>
+          <input type="text" name="other_errors" placeholder="Other"><br>
+
+          <label>Expected Correction:</label>
+          <textarea name="expected_correction"></textarea>
+
+          <h3>After Review</h3>
+          <input type="radio" name="status_0" value="Fully addressed"> Fully addressed<br>
+          <input type="radio" name="status_0" value="Partially addressed"> Partially addressed<br>
+          <input type="radio" name="status_0" value="Not addressed"> Not addressed<br>
+
+          <label>If partially or not addressed, describe what was missing:</label>
+          <textarea name="missing_details"></textarea>
+
+          <hr>
+        </div>
+      </div>
+
+      <button type="button" onclick="addCorrectionItem()">Adicionar Correction Item</button>
+      <button type="button" onclick="generatePDF()">Save as PDF</button>
+    </form>
+  </main>
+
+  <script>
+    function addCorrectionItem() {
+      const container = document.getElementById('correction-items');
+      const firstItem = container.querySelector('.correction-item');
+      const newItem = firstItem.cloneNode(true);
+
+      // Limpa campos da nova cópia
+      const inputs = newItem.querySelectorAll('input, textarea');
+      inputs.forEach(input => {
+        if (input.type === 'checkbox' || input.type === 'radio') {
+          input.checked = false;
+        } else {
+          input.value = '';
+        }
+      });
+
+      // Atualiza os names dos radios para não entrarem em conflito
+      const timestamp = Date.now();
+      const radios = newItem.querySelectorAll('input[type="radio"]');
+      radios.forEach(radio => {
+        radio.name = 'status_' + timestamp;
+      });
+
+      container.appendChild(newItem);
+    }
+
+    async function generatePDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const form = document.getElementById('formulario');
+      const formData = new FormData(form);
+      let y = 10;
+
+      doc.setFontSize(12);
+      doc.text("Correction Checklist", 10, y);
+      y += 10;
+
+      for (const [name, value] of formData.entries()) {
+        if (value.trim() !== "") {
+          const label = name.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+          const lines = doc.splitTextToSize(`${label}: ${value}`, 180);
+          doc.text(lines, 10, y);
+          y += lines.length * 10;
+          if (y > 280) {
+            doc.addPage();
+            y = 10;
+          }
+        }
+      }
+
+      doc.save("correction_checklist.pdf");
+    }
+  </script>
+
+</body>
+</html>
