@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Correction Checklist</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #d6f5d6;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      background-color: #fff;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    header img {
+      height: 60px;
+      width: auto;
+      border-radius: 8px;
+      margin-right: 20px;
+    }
+
+    header h1 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #000;
+      margin: 0;
+    }
+
+    main {
+      max-width: 800px;
+      background-color: #ffffffcc;
+      margin: 40px auto;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-top: 15px;
+    }
+
+    input[type="text"],
+    input[type="url"],
+    input[type="date"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border: none;
+      border-bottom: 1px solid #ccc;
+      background: transparent;
+      font-size: 14px;
+    }
+
+    textarea {
+      resize: vertical;
+    }
+
+    input[type="checkbox"],
+    input[type="radio"] {
+      margin-top: 10px;
+    }
+
+    button {
+      margin-top: 20px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
+
+    .correction-item {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 2px dashed #ccc;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <img src="https://i.ytimg.com/vi/aWcON7jyz0I/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLCWLHjOMSwkh-ZQysibuqDp6DsWEQ" alt="USA4ALL Logo">
+    <h1>USA4ALL - Immigration Law</h1>
+  </header>
+
+  <main id="formulario-container">
+    <form id="formulario">
+      <label>Reviewed Document Name:</label>
+      <select name="document_name">
+        <option value=""></option>
+        <option>Cover Letter</option>
+        <option>Final Package</option>
+        <option>Form</option>
+      </select>
+
+      <label>Document version (link):</label>
+      <input type="url" name="version_link">
+
+      <label>Case link (via MyCase):</label>
+      <input type="url" name="case_link">
+
+      <label>Reviewed on:</label>
+      <input type="date" name="reviewed_on">
+
+      <label>Return by:</label>
+      <input type="date" name="return_by">
+
+      <label>Reviewing Attorney:</label>
+      <input type="text" name="attorney">
+
+      <label>Primary Reviewer:</label>
+      <select name="primary_reviewer">
+        <option value=""></option>
+        <option>Ísis Almeida Silva</option>
+        <option>Naiara Daher</option>
+        <option>Sandra Moser</option>
+      </select>
+
+      <label>Case Manager:</label>
+      <select name="case_manager">
+        <option value=""></option>
+        <option>Fabiana Nascimento</option>
+        <option>Isis A. Silva</option>
+        <option>Lucas Franco</option>
+        <option>Myrelle Sinder</option>
+        <option>Mylena Rodrigues</option>
+        <option>Paola Fantinatti</option>
+        <option>Pedro Hartmann</option>
+      </select>
+
+      <div class="correction-item">
+        <h3>Correction Item</h3>
+
+        <label>Error Description:</label>
+        <textarea name="error_description"></textarea>
+
+        <label>Error Page:</label>
+        <input type="text" name="error_page">
+
+        <label>Error Paragraph:</label>
+        <input type="text" name="error_paragraph">
+
+        <h3>Error Type:</h3>
+        <input type="checkbox" name="error_type" value="Graphic"> Graphic<br>
+        <input type="checkbox" name="error_type" value="Formatting"> Formatting<br>
+        <input type="checkbox" name="error_type" value="Technical"> Technical<br>
+        <input type="text" name="other_errors" placeholder="Other"><br>
+
+        <label>Expected Correction:</label>
+        <textarea name="expected_correction"></textarea>
+
+        <h3>After Review</h3>
+        <input type="radio" name="status" value="Fully addressed"> Fully addressed<br>
+        <input type="radio" name="status" value="Partially addressed"> Partially addressed<br>
+        <input type="radio" name="status" value="Not addressed"> Not addressed<br>
+
+        <label>If partially or not addressed, describe what was missing:</label>
+        <textarea name="missing_details"></textarea>
+      </div>
+
+      <div id="extra-items"></div>
+
+      <button type="button" onclick="addCorrectionItem()">+ Add Correction Item</button>
+      <button type="button" onclick="generatePDF()">Save as PDF</button>
+    </form>
+  </main>
+
+  <script>
+    function addCorrectionItem() {
+      const container = document.getElementById("extra-items");
+      const original = document.querySelector(".correction-item");
+      const clone = original.cloneNode(true);
+      clone.querySelectorAll("textarea, input[type='text'], input[type='url']").forEach(el => el.value = "");
+      clone.querySelectorAll("input[type='checkbox'], input[type='radio']").forEach(el => el.checked = false);
+      container.appendChild(clone);
+    }
+
+    async function generatePDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({
+        unit: "mm",
+        format: "a4",
+        orientation: "portrait"
+      });
+
+      const margin = {
+        top: 20,
+        bottom: 25,
+        left: 15,
+        right: 15
+      };
+
+      let y = margin.top;
+      const lineSpacing = 7;
+      let pageNumber = 1;
+
+      const form = document.getElementById("formulario");
+      const formData = new FormData(form);
+
+      function writeLine(text) {
+        const lines = doc.splitTextToSize(text, 180);
+        if (y + lines.length * lineSpacing > 297 - margin.bottom) {
+          doc.text(`Page ${pageNumber}`, 200 - margin.right, 297 - 10, { align: 'right' });
+          doc.addPage();
+          y = margin.top;
+          pageNumber++;
+        }
+        doc.text(lines, margin.left, y);
+        y += lines.length * lineSpacing;
+      }
+
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(16);
+      doc.text("Correction Checklist", margin.left, y);
+      y += 10;
+
+      doc.setFontSize(12);
+      doc.setFont("Helvetica", "normal");
+
+      const grouped = {};
+      for (const [name, value] of formData.entries()) {
+        if (!grouped[name]) grouped[name] = [];
+        grouped[name].push(value);
+      }
+
+      const labels = {
+        document_name: "Reviewed Document Name",
+        version_link: "Document version (link)",
+        case_link: "Case link (via MyCase)",
+        reviewed_on: "Reviewed on",
+        return_by: "Return by",
+        attorney: "Reviewing Attorney",
+        primary_reviewer: "Primary Reviewer",
+        case_manager: "Case Manager",
+        error_description: "Error Description",
+        error_page: "Error Page",
+        error_paragraph: "Error Paragraph",
+        error_type: "Error Type",
+        other_errors: "Other Error",
+        expected_correction: "Expected Correction",
+        status: "After Review",
+        missing_details: "Missing Details"
+      };
+
+      const order = [
+        "document_name", "version_link", "case_link", "reviewed_on", "return_by",
+        "attorney", "primary_reviewer", "case_manager"
+      ];
+
+      for (const key of order) {
+        if (grouped[key]) writeLine(`${labels[key]}: ${grouped[key].join(", ")}`);
+      }
+
+      const itemCount = grouped["error_description"] ? grouped["error_description"].length : 0;
+      for (let i = 0; i < itemCount; i++) {
+        writeLine("");
+        writeLine(`Correction Item ${i + 1}`);
+        for (const key of [
+          "error_description", "error_page", "error_paragraph",
+          "error_type", "other_errors", "expected_correction",
+          "status", "missing_details"
+        ]) {
+          const values = grouped[key];
+          if (values && values[i]) writeLine(`${labels[key]}: ${values[i]}`);
+        }
+      }
+
+      doc.text(`Page ${pageNumber}`, 200 - margin.right, 297 - 10, { align: 'right' });
+      doc.save("correction_checklist.pdf");
+    }
+  </script>
+</body>
+</html>
+
